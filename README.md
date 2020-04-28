@@ -1,4 +1,4 @@
-# RedPSU API
+# Adder RedPSU API
 This example C# code allows you to control and interact with the Adder RedPSU product.
 
 https://www.adder.com/en/kvm-solutions/adder-red-psu
