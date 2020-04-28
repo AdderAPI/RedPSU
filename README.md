@@ -20,4 +20,7 @@ Using the API Class
 - You must provide an IP Address, Username and Password.
 - The API is restful, to get or update the current configurations, you can either use GetData or GetDataAsync.  GetDataAsync will run on another thread.
 - If AutoUpdate is enabled, calling GetDataAsync will automatically fetch the configuration every 2 seconds.
-- Any updates to the Observerable collections trigger corresponding events.
+- Any updates to the Observerable collections trigger corresponding events
+
+For further information about the RedPSU API, please visit:
+http://support.adder.com/tiki/tiki-index.php?page=RED-PSU%3A+Using+the+API
