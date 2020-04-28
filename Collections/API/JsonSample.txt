@@ -1,0 +1,1032 @@
+﻿{
+    "swagger": "2.0",
+    "info": {
+        "version": "0.0.5",
+        "title": "Adder RED-PSU API",
+        "description": "Adder Technology RED-PSU API.\n",
+        "contact": {
+            "name": "Vikash Chauhan / Mark Parr",
+            "email": "mark.parr@adder.com"
+        }
+    },
+    "host": "192.168.1.22",
+    "basePath": "/api",
+    "schemes": [A
+        "http"
+    ],
+    "consumes": [
+        "application/json",
+        "multipart/form-data"
+    ],
+    "produces": [
+        "application/json"
+    ],
+    "tags": [
+        {
+            "name": "System",
+            "description": "Unit level information and controls."
+        },
+        {
+            "name": "PSUs",
+            "description": "PSU information"
+        },
+        {
+            "name": "Users",
+            "description": "Set up and read user information."
+        },
+        {
+            "name": "Outputs",
+            "description": "Output status and control."
+        },
+        {
+            "name": "Network",
+            "description": "Network settings"
+        }
+    ],
+    "paths": {
+        "/system": {
+            "get": {
+                "tags": [
+                    "System"
+                ],
+                "summary": "Get system level information",
+                "description": "",
+                "responses": {
+                    "200": {
+                        "description": "OK.",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "data": {
+                                    "type": "object",
+                                    "properties": {
+                                        "id": {
+                                            "type": "string",
+                                            "default": "info"
+                                        },
+                                        "type": {
+                                            "type": "string",
+                                            "default": "system"
+                                        },
+                                        "attributes": {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/definitions/systemRO"
+                                                },
+                                                {
+                                                    "$ref": "#/definitions/systemRW"
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorised.  Invalid or no credentials provided."
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "System"
+                ],
+                "summary": "Update the system information",
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "resource",
+                        "description": "System info object with attributes to be updated.",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "data": {
+                                    "type": "object",
+                                    "properties": {
+                                        "id": {
+                                            "type": "string",
+                                            "default": "info"
+                                        },
+                                        "type": {
+                                            "type": "string",
+                                            "default": "system"
+                                        },
+                                        "attributes": {
+                                            "$ref": "#/definitions/systemRW"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Successful Operation (No Content)."
+                    },
+                    "401": {
+                        "description": "Unauthorised.  Invalid or no credentials provided."
+                    },
+                    "409": {
+                        "description": "Conflict.  Type and ID do not match the server's endpoint."
+                    }
+                }
+            }
+        },
+        "/system/reset": {
+            "post": {
+                "tags": [
+                    "System"
+                ],
+                "summary": "Perform a system reset",
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "level",
+                        "description": "Reset level",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "level": {
+                                    "type": "string",
+                                    "enum": [
+                                        "UNIT",
+                                        "FACTORY"
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Successful Operation (No Content)."
+                    },
+                    "401": {
+                        "description": "Unauthorised.  Invalid or no credentials provided."
+                    }
+                }
+            }
+        },
+        "/system/identify": {
+            "post": {
+                "tags": [
+                    "System"
+                ],
+                "summary": "Identify the unit by flashing LED's",
+                "description": "Flash the LEDs the required number of times to identify the unit.  A negative value will flash them indefinitely.  Setting to 0 will stop the flashing.",
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "repeat",
+                        "description": "Number of repeats.",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "repeat": {
+                                    "type": "number",
+                                    "enum": [
+                                        -1,
+                                        0,
+                                        3,
+                                        5,
+                                        10
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Successful Operation (No Content)."
+                    },
+                    "401": {
+                        "description": "Unauthorised.  Invalid or no credentials provided."
+                    }
+                }
+            }
+        },
+        "/system/updateFirmware": {
+            "post": {
+                "tags": [
+                    "System"
+                ],
+                "summary": "Update the system firmware",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "parameters": [
+                    {
+                        "in": "formData",
+                        "type": "file",
+                        "name": "firmwareImage",
+                        "description": "Firmware Image",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Successful Operation (No Content)."
+                    },
+                    "401": {
+                        "description": "Unauthorised.  Invalid or no credentials provided."
+                    }
+                }
+            }
+        },
+        "/outputs": {
+            "get": {
+                "tags": [
+                    "Outputs"
+                ],
+                "summary": "Get all Outputs",
+                "description": "",
+                "responses": {
+                    "200": {
+                        "description": "OK.",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "data": {
+                                    "type": "array",
+                                    "items": {
+                                        "properties": {
+                                            "id": {
+                                                "type": "string"
+                                            },
+                                            "type": {
+                                                "type": "string",
+                                                "default": "output"
+                                            },
+                                            "attributes": {
+                                                "allOf": [
+                                                    {
+                                                        "$ref": "#/definitions/outputRO"
+                                                    },
+                                                    {
+                                                        "$ref": "#/definitions/outputRW"
+                                                    }
+                                                ]
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorised.  Invalid or no credentials provided."
+                    }
+                }
+            }
+        },
+        "/outputs/{id}": {
+            "get": {
+                "tags": [
+                    "Outputs"
+                ],
+                "summary": "Get a single Output.",
+                "description": "",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "description": "ID of Output",
+                        "required": true,
+                        "type": "number"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK.",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "data": {
+                                    "type": "object",
+                                    "properties": {
+                                        "id": {
+                                            "type": "string"
+                                        },
+                                        "type": {
+                                            "type": "string",
+                                            "default": "output"
+                                        },
+                                        "attributes": {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/definitions/outputRO"
+                                                },
+                                                {
+                                                    "$ref": "#/definitions/outputRW"
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorised.  Invalid or no credentials provided."
+                    },
+                    "404": {
+                        "description": "Document not found."
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Outputs"
+                ],
+                "summary": "Update an Output.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "description": "ID of Output",
+                        "required": true,
+                        "type": "number"
+                    },
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "Output object with attributes to be updated.",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "data": {
+                                    "type": "object",
+                                    "properties": {
+                                        "id": {
+                                            "type": "string"
+                                        },
+                                        "type": {
+                                            "type": "string",
+                                            "default": "output"
+                                        },
+                                        "attributes": {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/definitions/outputWO"
+                                                },
+                                                {
+                                                    "$ref": "#/definitions/outputRW"
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Successful Operation (No Content)."
+                    },
+                    "401": {
+                        "description": "Unauthorised.  Invalid or no credentials provided."
+                    },
+                    "404": {
+                        "description": "Not Found.  Response to a request to modify a resource that does not exist."
+                    },
+                    "409": {
+                        "description": "Conflict.  Type and ID do not match the server's endpoint."
+                    }
+                }
+            }
+        },
+        "/psus": {
+            "get": {
+                "tags": [
+                    "PSUs"
+                ],
+                "summary": "Get all PSUs",
+                "description": "",
+                "responses": {
+                    "200": {
+                        "description": "OK.",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "data": {
+                                    "type": "array",
+                                    "items": {
+                                        "properties": {
+                                            "id": {
+                                                "type": "string"
+                                            },
+                                            "type": {
+                                                "type": "string",
+                                                "default": "psu"
+                                            },
+                                            "attributes": {
+                                                "$ref": "#/definitions/psu"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorised.  Invalid or no credentials provided."
+                    }
+                }
+            }
+        },
+        "/psus/{id}": {
+            "get": {
+                "tags": [
+                    "PSUs"
+                ],
+                "summary": "Get a single PSU",
+                "description": "",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "description": "ID of PSU",
+                        "required": true,
+                        "type": "number"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK.",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "data": {
+                                    "type": "object",
+                                    "properties": {
+                                        "id": {
+                                            "type": "string"
+                                        },
+                                        "type": {
+                                            "type": "string",
+                                            "default": "psu"
+                                        },
+                                        "attributes": {
+                                            "$ref": "#/definitions/psu"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorised.  Invalid or no credentials provided."
+                    },
+                    "404": {
+                        "description": "Document not found."
+                    }
+                }
+            }
+        },
+        "/users": {
+            "get": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Get all Users accounts.",
+                "description": "",
+                "responses": {
+                    "200": {
+                        "description": "OK.",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "data": {
+                                    "type": "array",
+                                    "items": {
+                                        "properties": {
+                                            "id": {
+                                                "type": "string"
+                                            },
+                                            "type": {
+                                                "type": "string",
+                                                "default": "user"
+                                            },
+                                            "attributes": {
+                                                "$ref": "#/definitions/userRW"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorised.  Invalid or no credentials provided."
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Add a new User account.",
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "User object with new User attributes.",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "data": {
+                                    "type": "object",
+                                    "properties": {
+                                        "type": {
+                                            "type": "string",
+                                            "default": "user"
+                                        },
+                                        "attributes": {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/definitions/userRW"
+                                                },
+                                                {
+                                                    "$ref": "#/definitions/userWO"
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Resource Created.",
+                        "headers": {
+                            "Location": {
+                                "description": "Location of the newly created resource.",
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorised.  Invalid or no credentials provided."
+                    },
+                    "409": {
+                        "description": "Conflict.  Type and ID do not match the server's endpoint or user name already exists."
+                    },
+                    "403": {
+                        "description": "Forbidden.  Request refused as maximum number of users have been defined."
+                    }
+                }
+            }
+        },
+        "/users/{id}": {
+            "get": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Get a single User account.",
+                "description": "",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "description": "ID of User",
+                        "required": true,
+                        "type": "number"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK.",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "data": {
+                                    "type": "object",
+                                    "properties": {
+                                        "id": {
+                                            "type": "string"
+                                        },
+                                        "type": {
+                                            "type": "string",
+                                            "default": "user"
+                                        },
+                                        "attributes": {
+                                            "$ref": "#/definitions/userRW"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorised.  Invalid or no credentials provided."
+                    },
+                    "404": {
+                        "description": "Document not found."
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Update a User account.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "description": "ID of User",
+                        "required": true,
+                        "type": "number"
+                    },
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "User object with attributes to be updated.",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "data": {
+                                    "type": "object",
+                                    "properties": {
+                                        "id": {
+                                            "type": "string"
+                                        },
+                                        "type": {
+                                            "type": "string",
+                                            "default": "user"
+                                        },
+                                        "attributes": {
+                                            "$ref": "#/definitions/userWO"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Successful Operation (No Content)."
+                    },
+                    "401": {
+                        "description": "Unauthorised.  Invalid or no credentials provided."
+                    },
+                    "404": {
+                        "description": "Not Found.  Response to a request to modify a resource that does not exist."
+                    },
+                    "409": {
+                        "description": "Conflict.  Type and ID do not match the server's endpoint."
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Delete a User account.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "description": "ID of User",
+                        "required": true,
+                        "type": "number"
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Successful Operation (No Content)."
+                    },
+                    "401": {
+                        "description": "Unauthorised.  Invalid or no credentials provided."
+                    },
+                    "404": {
+                        "description": "Not Found.  Response to a request to delete a resource that does not exist."
+                    },
+                    "409": {
+                        "description": "Conflict.  Response to a request to delete admin user."
+                    }
+                }
+            }
+        },
+        "/users/me": {
+            "get": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Special case to get the user information for authenticated user.",
+                "description": "",
+                "responses": {
+                    "200": {
+                        "description": "OK.",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "data": {
+                                    "type": "object",
+                                    "properties": {
+                                        "id": {
+                                            "type": "string"
+                                        },
+                                        "type": {
+                                            "type": "string",
+                                            "default": "user"
+                                        },
+                                        "attributes": {
+                                            "$ref": "#/definitions/userRW"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorised.  Invalid or no credentials provided."
+                    },
+                    "404": {
+                        "description": "Document not found."
+                    }
+                }
+            }
+        },
+        "/network": {
+            "get": {
+                "tags": [
+                    "Network"
+                ],
+                "summary": "Get network information",
+                "description": "",
+                "responses": {
+                    "200": {
+                        "description": "OK.",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "data": {
+                                    "type": "object",
+                                    "properties": {
+                                        "id": {
+                                            "type": "string",
+                                            "default": "info"
+                                        },
+                                        "type": {
+                                            "type": "string",
+                                            "default": "network"
+                                        },
+                                        "attributes": {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/definitions/networkRO"
+                                                },
+                                                {
+                                                    "$ref": "#/definitions/networkRW"
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorised.  Invalid or no credentials provided."
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Network"
+                ],
+                "summary": "Update the network information",
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "resource",
+                        "description": "Network object with attributes to be updated.",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "data": {
+                                    "type": "object",
+                                    "properties": {
+                                        "id": {
+                                            "type": "string",
+                                            "default": "info"
+                                        },
+                                        "type": {
+                                            "type": "string",
+                                            "default": "network"
+                                        },
+                                        "attributes": {
+                                            "$ref": "#/definitions/networkRW"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Successful Operation (No Content)."
+                    },
+                    "401": {
+                        "description": "Unauthorised.  Invalid or no credentials provided."
+                    },
+                    "409": {
+                        "description": "Conflict.  Type and ID do not match the server's endpoint."
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "systemRW": {
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "description": "Unit name",
+                    "maxLength": 20
+                },
+                "description": {
+                    "type": "string",
+                    "description": "Unit description",
+                    "maxLength": 30
+                },
+                "location": {
+                    "type": "string",
+                    "description": "Unit location",
+                    "maxLength": 20
+                },
+                "requirePassword": {
+                    "type": "boolean",
+                    "description": "True if a password is required to access the unit."
+                },
+                "startupDelay": {
+                    "description": "Delay after reset before outputs start to switch on (ms).",
+                    "type": "number"
+                },
+                "channelInterval": {
+                    "description": "Interval between Outputs switching on (ms).",
+                    "type": "number"
+                }
+            }
+        },
+        "systemRO": {
+            "properties": {
+                "firmwareVersion": {
+                    "description": "Currently running system firmware version.",
+                    "type": "string"
+                }
+            }
+        },
+        "outputRO": {
+            "properties": {
+                "outputNumber": {
+                    "type": "number",
+                    "description": "The output number corresponding to the physical output on the unit."
+                },
+                "current": {
+                    "type": "number",
+                    "format": "float",
+                    "description": "Output current (amps)."
+                },
+                "power": {
+                    "type": "number",
+                    "format": "float",
+                    "description": "Output power (watts)."
+                },
+                "status": {
+                    "type": "string",
+                    "description": "Current Output status.",
+                    "enum": [
+                        "on",
+                        "off",
+                        "fault"
+                    ]
+                }
+            }
+        },
+        "outputRW": {
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "description": "Human readable label corresponding to the output port.",
+                    "maxLength": 20
+                }
+            }
+        },
+        "outputWO": {
+            "properties": {
+                "status": {
+                    "type": "string",
+                    "description": "Set the requested Output status.",
+                    "enum": [
+                        "ON",
+                        "OFF"
+                    ]
+                }
+            }
+        },
+        "psu": {
+            "properties": {
+                "psuNumber": {
+                    "type": "number",
+                    "description": "The PSU number corresponding to the physical psu on the unit."
+                },
+                "status": {
+                    "type": "string",
+                    "description": "Current state of the PSU.",
+                    "enum": [
+                        "active",
+                        "present",
+                        "not present",
+                        "invalid"
+                    ]
+                },
+                "internalTemperature": {
+                    "type": "number",
+                    "format": "float",
+                    "description": "Internal temperature (degrees Celsius)."
+                },
+                "ambientTemperature": {
+                    "type": "number",
+                    "format": "float",
+                    "description": "Ambient temperature (degrees Celsius)."
+                },
+                "fanSpeed": {
+                    "type": "number",
+                    "description": "Fan-speed (rpm)."
+                },
+                "mainsCurrent": {
+                    "type": "number",
+                    "format": "float",
+                    "description": "Input current (amps)."
+                },
+                "outputCurrent": {
+                    "type": "number",
+                    "format": "float",
+                    "description": "Output current (amps)."
+                }
+            }
+        },
+        "userRW": {
+            "properties": {
+                "username": {
+                    "type": "string",
+                    "description": "Unique username",
+                    "maxLength": 18
+                }
+            }
+        },
+        "userWO": {
+            "properties": {
+                "password": {
+                    "type": "string",
+                    "description": "Password"
+                }
+            }
+        },
+        "networkRO": {
+            "properties": {
+                "macAddress": {
+                    "type": "string",
+                    "description": "Network interface MAC address"
+                }
+            }
+        },
+        "networkRW": {
+            "properties": {
+                "ipAddress": {
+                    "type": "string",
+                    "description": "IP Address"
+                },
+                "ipNetmask": {
+                    "type": "string",
+                    "description": "Netmask IP"
+                },
+                "ipGateway": {
+                    "type": "string",
+                    "description": "Gateway IP"
+                },
+                "useDhcp": {
+                    "type": "boolean",
+                    "description": "Use DHCP"
+                }
+            }
+        }
+    }
+}
